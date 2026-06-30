@@ -1,0 +1,654 @@
+{
+  "info": {
+    "_postman_id": "8c5b62d8-55a0-47b2-a42e-8d8a55986fe4",
+    "name": "Event Management API",
+    "description": "Postman Collection for Event Management Platform backend API. Includes endpoints for Authentication, Profile Management, Events Management, Registrations, and File Uploads.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health & Utilities",
+      "item": [
+        {
+          "name": "Server Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check if the API server is up and database connection is operational."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "User Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.success && response.data && response.data.token) {",
+                  "    pm.collectionVariables.set(\"auth_token\", response.data.token);",
+                  "    console.log(\"Auth token automatically updated in collection variables!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"ORGANIZER\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account. Role can be USER, ORGANIZER, ADMIN, or SUPER_ADMIN. On successful registration, it automatically saves the authentication token."
+          },
+          "response": []
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.success && response.data && response.data.token) {",
+                  "    pm.collectionVariables.set(\"auth_token\", response.data.token);",
+                  "    console.log(\"Auth token automatically updated in collection variables!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticate user credentials. Returns JWT token and user info. On success, the token is automatically saved into the collection's `auth_token` variable."
+          },
+          "response": []
+        },
+        {
+          "name": "User Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Log out the currently logged-in user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Profiles",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Retrieve profile information of the currently authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "John Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "johnupdated@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_image",
+                  "type": "file",
+                  "description": "Optional profile photo file upload"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Update name, email, and/or profile photo. Requires multipart form-data. File is uploaded either to S3 or locally depending on config."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Event Management",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events?status=UPCOMING&search=&upcoming=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "UPCOMING",
+                  "description": "Filter by status: UPCOMING, ONGOING, COMPLETED, CANCELLED"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search keyword for event title/description"
+                },
+                {
+                  "key": "created_by",
+                  "value": "",
+                  "description": "Filter events created by user ID",
+                  "disabled": true
+                },
+                {
+                  "key": "upcoming",
+                  "value": "true",
+                  "description": "Set to true to show only upcoming events based on start_date"
+                }
+              ]
+            },
+            "description": "Get a list of events. Supports query parameters for filtering and searching. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID"
+                }
+              ]
+            },
+            "description": "Get detailed information about a single event by its ID. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Web Development Bootcamp 2026",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An intensive hands-on bootcamp teaching full-stack web development.",
+                  "type": "text"
+                },
+                {
+                  "key": "venue",
+                  "value": "Auditorium 3, Tech Hub Campus",
+                  "type": "text"
+                },
+                {
+                  "key": "start_date",
+                  "value": "2026-09-15T09:00:00.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2026-09-17T17:00:00.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "max_participants",
+                  "value": "100",
+                  "type": "text"
+                },
+                {
+                  "key": "registration_deadline",
+                  "value": "2026-09-10T23:59:59.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "UPCOMING",
+                  "type": "text"
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "description": "Optional event banner image file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            },
+            "description": "Create a new event. Requires authenticated user with ORGANIZER, ADMIN, or SUPER_ADMIN role. Accepts multipart form-data to allow banner image upload."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Web Development Bootcamp 2026 (Updated)",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An intensive hands-on bootcamp teaching modern full-stack web development.",
+                  "type": "text"
+                },
+                {
+                  "key": "venue",
+                  "value": "Auditorium 4, Tech Hub Campus",
+                  "type": "text"
+                },
+                {
+                  "key": "max_participants",
+                  "value": "120",
+                  "type": "text"
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "description": "Upload a new banner image if changing"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID to update"
+                }
+              ]
+            },
+            "description": "Update an existing event. Only values provided will be updated. Requires authenticated event owner (creator) or Admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID to delete"
+                }
+              ]
+            },
+            "description": "Delete an event. Requires authenticated event owner or Admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Event Registrations",
+      "item": [
+        {
+          "name": "Register for Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/:id/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id",
+                "register"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID to register for"
+                }
+              ]
+            },
+            "description": "Register the currently authenticated user for a specific event."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Participants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/:id/participants",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id",
+                "participants"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID"
+                }
+              ]
+            },
+            "description": "Get the list of registered participants for an event. Available to the Event Organizer and Administrators."
+          },
+          "response": []
+        },
+        {
+          "name": "Check-in Participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"participant-user-uuid-here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/:id/checkin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                ":id",
+                "checkin"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here",
+                  "description": "The unique event UUID"
+                }
+              ]
+            },
+            "description": "Mark a registered participant as checked-in at the venue. Available to the Event Organizer and Administrators."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Registrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/my",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "my"
+              ]
+            },
+            "description": "Retrieve all events the logged-in user has registered for."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "File Operations",
+      "item": [
+        {
+          "name": "Upload File (General)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "The file to upload"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/upload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "upload"
+              ]
+            },
+            "description": "General upload endpoint. Accepts a single file in field `file`. Returns the public URL of the uploaded resource."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/upload/:fileKey",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                ":fileKey"
+              ],
+              "variable": [
+                {
+                  "key": "fileKey",
+                  "value": "file-uuid-or-url-here",
+                  "description": "Filename key (or full URL) to delete"
+                }
+              ]
+            },
+            "description": "Deletes an uploaded file by its key or URL. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
